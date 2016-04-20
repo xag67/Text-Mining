@@ -39,8 +39,10 @@ def normalize_trace(open_file) :	#! return call list after finding them in trace
 	word_list = []
 	for line in open_file :
 		call = line.split("(")
-		word_list.append(call[0])
-	del word_list[len(word_list)-1]
+		if call[0] != "--- SIGINT ":
+			word_list.append(call[0])
+	if word_list[len(word_list)-1] == "+++ killed by SIGINT +++\n" or word_list[len(word_list)-1] == "+++ exited " :
+		del word_list[len(word_list)-1]
 	return word_list
 
 def buildTfDico (word_list,size) :    # build term frequency dico
@@ -56,7 +58,7 @@ def buildTfDico (word_list,size) :    # build term frequency dico
 
 def getTf(File):				#! term frenquency for one file
 	opened_file = open(File,"r")
-	if sys.argv[1] == "-t" :	
+	if sys.argv[1] == "-t" or sys.argv[2] == "-t":	
 		word_list = normalize_trace(opened_file)
 	else :
 		word_list = normalize(opened_file)
@@ -165,26 +167,27 @@ def affiche(score_list): 					#! Bad display function :/
 		
 
 def main() : 
-	if sys.argv[1] == "-t" :						#! need to change for a switch of sys.argv[1] , but i'm fed up
-		folder = os.path.abspath(sys.argv[2])
+	if sys.argv[1] == "-t" or sys.argv[1] == "-o" :						#! need to change for a switch of sys.argv[1] , but i'm fed up
+		if sys.argv[2] == "-o" or sys.argv[2] == "-t":
+			folder = os.path.abspath(sys.argv[3])	
+		else :
+			folder = os.path.abspath(sys.argv[2])
 	else:
 		folder = os.path.abspath(sys.argv[1])
-		
-	if sys.argv[1] == "-o" :
-		folder = os.path.abspath(sys.argv[2])
-	else:
-		folder = os.path.abspath(sys.argv[1])
+	
 	list_file = readFolder(folder)
 	list_tf = getTfAll(list_file)
 	dico_idf = getIdf(list_tf)
 	score_list = getTfIdfScore(list_tf,dico_idf)
-	if sys.argv[1] == "-o" :
+	if sys.argv[1] == "-o" or sys.argv[2] == "-o" :
 		makeText(score_list)		
 	if len(list_tf):
+		if sys.argv[1] == "-t" or sys.argv[2] == "-t" :
+			print("If you see only default score = 0 for a trace file (often happen) that mean that the trace contain no important call")
 		affiche(score_list)
 	return 
-	
 
+	
 
 
 main()
