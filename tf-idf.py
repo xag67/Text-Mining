@@ -5,6 +5,7 @@ import os
 import glob
 import re 
 import math
+from nltk.stem.snowball import SnowballStemmer
 
 #! Check input -------------------------------------------------------------------------------------------
 if len(sys.argv) > 4 and len(sys.argv) < 2:
@@ -47,7 +48,11 @@ def normalize_trace(open_file) :	#! return call list after finding them in trace
 
 def buildTfDico (word_list,size) :    # build term frequency dico
 	tf_dico = {}
+	stemmer2 = SnowballStemmer("english", ignore_stopwords=True)
 	for word in word_list :
+		print(word)
+		word = stemmer2.stem(word)
+		print (word)
 		if word in tf_dico :
 			tf_dico[word] = tf_dico[word] + 1.0 
 		else : 
@@ -174,7 +179,6 @@ def main() :
 			folder = os.path.abspath(sys.argv[2])
 	else:
 		folder = os.path.abspath(sys.argv[1])
-	
 	list_file = readFolder(folder)
 	list_tf = getTfAll(list_file)
 	dico_idf = getIdf(list_tf)
